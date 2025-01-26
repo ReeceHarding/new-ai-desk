@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  redis:
+    image: arm64v8/redis:latest
+    container_name: smart-outreach-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  selenium:
+    image: seleniarm/standalone-chromium:latest
+    container_name: smart-outreach-selenium
+    ports:
+      - "4444:4444"
+      - "7900:7900"  # VNC viewer
+    environment:
+      - SE_NODE_MAX_SESSIONS=4
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+    volumes:
+      - /dev/shm:/dev/shm
+    restart: unless-stopped
+    shm_size: '2g'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+    name: smart-outreach-redis-data 

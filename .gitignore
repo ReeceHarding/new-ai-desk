@@ -1,0 +1,47 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+
+# Next.js
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.development
+.env.production
+
+# Docker
+*.pid
+*.sock
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+tmp/
+temp/ 
