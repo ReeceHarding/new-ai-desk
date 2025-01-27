@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { supabaseClient } from '@/utils/supabase';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Layout } from '@/components/ui/Layout';
+import { MotionWrapper } from '@/components/ui/MotionWrapper';
+import { supabaseClient } from '@/utils/supabase';
 
 export default function AgentDashboard() {
   const router = useRouter();
@@ -57,12 +57,13 @@ export default function AgentDashboard() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
-        <motion.div
+        <MotionWrapper
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6"
+          transition={{ duration: 0.5 }}
+          className="text-center"
         >
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Agent Dashboard
@@ -70,44 +71,50 @@ export default function AgentDashboard() {
           <p className="mt-2 text-gray-600 dark:text-gray-300">
             Manage customer tickets and support requests
           </p>
-        </motion.div>
+        </MotionWrapper>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { title: 'Active Tickets', value: '12', status: 'normal' },
-            { title: 'Urgent Tickets', value: '3', status: 'urgent' },
-            { title: 'Resolved Today', value: '8', status: 'success' }
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="p-6">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {stat.title}
-                </h3>
-                <p className={`mt-2 text-3xl font-bold ${
-                  stat.status === 'urgent'
-                    ? 'text-red-600 dark:text-red-400'
-                    : stat.status === 'success'
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-gray-900 dark:text-white'
-                }`}>
-                  {stat.value}
-                </p>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Ticket Queue */}
-        <motion.div
+        {/* Stats Grid */}
+        <MotionWrapper
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { title: 'Active Tickets', value: '12', status: 'normal' },
+              { title: 'Urgent Tickets', value: '3', status: 'urgent' },
+              { title: 'Resolved Today', value: '8', status: 'success' }
+            ].map((stat, index) => (
+              <MotionWrapper
+                key={stat.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="p-6">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {stat.title}
+                  </h3>
+                  <p className={`mt-2 text-3xl font-bold ${
+                    stat.status === 'urgent'
+                      ? 'text-red-600 dark:text-red-400'
+                      : stat.status === 'success'
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-gray-900 dark:text-white'
+                  }`}>
+                    {stat.value}
+                  </p>
+                </Card>
+              </MotionWrapper>
+            ))}
+          </div>
+        </MotionWrapper>
+
+        {/* Ticket Queue */}
+        <MotionWrapper
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
           <Card>
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -175,7 +182,7 @@ export default function AgentDashboard() {
               ))}
             </div>
           </Card>
-        </motion.div>
+        </MotionWrapper>
       </div>
     </Layout>
   );

@@ -1,44 +1,46 @@
+'use client';
+
 import { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { MotionWrapper } from './MotionWrapper';
+import Link from 'next/link';
 
 interface CardProps {
   children: ReactNode;
-  href?: string;
   className?: string;
+  href?: string;
 }
 
-export const Card = ({ children, href, className = '' }: CardProps) => {
-  const Component = href ? motion.a : motion.div;
-
-  return (
-    <Component
-      href={href}
-      whileHover={{ y: -4 }}
-      className={`
-        group
-        relative overflow-hidden
-        rounded-2xl
-        bg-gradient-to-b from-white to-slate-50
-        dark:from-slate-900 dark:to-slate-800
-        border border-slate-200 dark:border-slate-700
-        shadow-sm hover:shadow-md
-        transition-all duration-300
-        ${className}
-      `}
-    >
-      {/* Highlight effect */}
-      <div
-        className="
-          absolute inset-0
-          bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0
-          translate-x-[-100%] group-hover:translate-x-[100%]
-          transition-transform duration-1000
-        "
-      />
-
-      <div className="relative p-6">
+export const Card = ({ children, className = '', href }: CardProps) => {
+  const content = (
+    <div className={`
+      relative overflow-hidden
+      bg-white
+      border border-gray-100
+      rounded-2xl
+      p-8
+      ${className}
+    `}>
+      <div className="relative">
         {children}
       </div>
-    </Component>
+    </div>
+  );
+
+  return (
+    <MotionWrapper
+      whileHover={{ 
+        y: -4,
+        boxShadow: '0 25px 50px -12px rgba(75, 30, 145, 0.15)'
+      }}
+      transition={{ duration: 0.2 }}
+    >
+      {href ? (
+        <Link href={href} className="block">
+          {content}
+        </Link>
+      ) : (
+        content
+      )}
+    </MotionWrapper>
   );
 }; 

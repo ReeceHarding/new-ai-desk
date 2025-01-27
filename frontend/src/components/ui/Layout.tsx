@@ -1,7 +1,10 @@
+'use client';
+
 import { ReactNode, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { MobileMenu } from './MobileMenu';
+import { Button } from './Button';
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,20 +15,24 @@ export const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Sign In', href: '/auth/signin' },
-    { name: 'Sign Up', href: '/auth/signup' }
+    { name: 'Features', href: '/features' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'Resources', href: '/resources' },
+    { name: 'Company', href: '/company' }
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full backdrop-blur-lg bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-700/50 z-50">
+      <nav className="fixed top-0 w-full bg-white border-b border-gray-100 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-indigo-600">
-                Smart CRM
+              <Link href="/" className="flex items-center space-x-2">
+                <span className="text-2xl">⚡</span>
+                <span className="text-2xl font-bold text-[#4B1E91]">
+                  Smart CRM
+                </span>
               </Link>
             </div>
 
@@ -35,18 +42,31 @@ export const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-base font-medium text-gray-700 hover:text-[#4B1E91] transition-colors duration-200"
                 >
                   {item.name}
                 </Link>
               ))}
+              <Link href="/auth/signin">
+                <Button variant="secondary" size="sm">Log In</Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button variant="primary" size="sm" className="bg-[#FF622D] hover:bg-[#FF4500]">Sign Up</Button>
+              </Link>
             </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white focus:outline-none"
+                className="
+                  inline-flex items-center justify-center p-2 
+                  rounded-lg
+                  text-gray-700 hover:text-[#4B1E91]
+                  hover:bg-gray-50
+                  focus:outline-none
+                  transition-colors duration-200
+                "
               >
                 <svg
                   className="h-6 w-6"
@@ -76,35 +96,12 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
 
         {/* Mobile menu */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden"
-            >
-              <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <MobileMenu isOpen={isOpen} navigation={navigation} />
       </nav>
 
       {/* Main content */}
-      <main className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </div>
+      <main>
+        {children}
       </main>
     </div>
   );

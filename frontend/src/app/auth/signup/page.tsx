@@ -1,178 +1,183 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { supabaseClient } from '@/utils/supabase';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
-import type { UserRole } from '@/utils/supabase';
+import { MotionWrapper } from '@/components/ui/MotionWrapper';
+import { supabaseClient } from '@/utils/supabase';
 
-export default function SignupPage() {
+export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('customer');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState('customer');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
-  async function handleSignup(e: React.FormEvent) {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    setErrorMsg('');
+    setError('');
 
     try {
-      // 1) Supabase Auth sign-up
-      const { data, error } = await supabaseClient.auth.signUp({
+      const { data, error: signUpError } = await supabaseClient.auth.signUp({
         email,
         password,
       });
 
-      if (!error) {
-        if (!data.user) {
-          setErrorMsg('No user returned from sign up');
-          return;
-        }
+      if (signUpError) {
+        setError(signUpError.message);
+        return;
+      }
 
-        const { error: insertError } = await supabaseClient
+      if (data.user) {
+        // Create user profile
+        const { error: profileError } = await supabaseClient
           .from('users')
-          .insert([{ id: data.user.id, role, email }]);
+          .insert([
+            {
+              id: data.user.id,
+              email: data.user.email,
+              role,
+            },
+          ]);
 
-        if (insertError) {
-          setErrorMsg(insertError.message);
+        if (profileError) {
+          setError(profileError.message);
           return;
         }
 
         router.push('/auth/signin');
-      } else {
-        setErrorMsg(error.message);
       }
     } catch (err) {
-      setErrorMsg('An unexpected error occurred');
-      console.error('Signup error:', err);
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : 'An error occurred');
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
+    <div className="min-h-screen bg-[#15192C] flex items-center justify-center p-4">
+      {/* Background shapes */}
+      <div className="absolute top-0 right-0 w-1/3 h-screen bg-[#45E3C6] opacity-20 blur-3xl rounded-l-full" />
+      <div className="absolute bottom-0 left-0 w-1/3 h-screen bg-[#6B2EB3] opacity-20 blur-3xl rounded-r-full" />
+
+      <MotionWrapper
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full"
+        transition={{ duration: 0.6 }}
       >
-        <Card className="w-full">
-          <div className="text-center mb-8">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="flex justify-center mb-6"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-3xl font-extrabold text-gray-900 dark:text-white"
-            >
-              Create your account
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-2 text-lg text-gray-600 dark:text-gray-300"
-            >
-              Start managing your customer relationships
-            </motion.p>
-          </div>
+        <Card className="w-full max-w-md p-8 space-y-8 relative z-10">
+          {/* Logo */}
+          <Link href="/" className="flex items-center justify-center space-x-2 mb-8">
+            <span className="text-2xl">⚡</span>
+            <span className="text-2xl font-bold text-[#4B1E91]">Smart CRM</span>
+          </Link>
 
-          <form onSubmit={handleSignup} className="space-y-6">
-            <div className="space-y-4">
-              <Input
+          <h1 className="text-2xl font-bold text-center text-gray-900">
+            Create your account
+          </h1>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email address
+              </label>
+              <input
                 id="email"
                 type="email"
-                label="Email address"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                error={errorMsg}
-              />
-              <Input
-                id="password"
-                type="password"
-                label="Password"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                placeholder="Enter your work email"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={errorMsg}
               />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
               <div className="relative">
-                <label
-                  htmlFor="role"
-                  className="absolute -top-2.5 left-4 px-1 bg-white dark:bg-slate-800 text-sm text-slate-400"
-                >
-                  Role
-                </label>
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as UserRole)}
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Create a password"
                   required
-                  className=" w-full px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 "
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  aria-label="Toggle password visibility"
                 >
-                  <option value="customer">Customer</option>
-                  <option value="agent">Agent</option>
-                  <option value="admin">Admin</option>
-                </select>
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
-            {errorMsg && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-lg bg-red-50 dark:bg-red-900/50 p-4"
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
               >
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                      {errorMsg}
-                    </h3>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                <option value="customer">Customer</option>
+                <option value="agent">Agent</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full py-3 bg-[#FF622D] hover:bg-[#FF4500]"
             >
-              <Button
-                type="submit"
-                loading={loading}
-                className="w-full"
-              >
-                Sign up
-              </Button>
-            </motion.div>
+              Create account
+            </Button>
           </form>
+
+          <div className="text-sm text-center space-y-4">
+            <p className="text-gray-600">
+              By creating your account, you agree to the{' '}
+              <Link href="/terms" className="text-primary-600 hover:text-primary-500">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="text-primary-600 hover:text-primary-500">
+                Privacy Policy
+              </Link>
+            </p>
+            <p className="text-gray-600">
+              Already have an account?{' '}
+              <Link href="/auth/signin" className="text-primary-600 hover:text-primary-500 font-medium">
+                Log in
+              </Link>
+            </p>
+          </div>
         </Card>
-      </motion.div>
+      </MotionWrapper>
     </div>
   );
 } 

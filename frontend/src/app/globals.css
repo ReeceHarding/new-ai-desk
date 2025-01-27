@@ -14,8 +14,95 @@
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    @apply h-full scroll-smooth;
+  }
+  
+  body {
+    @apply h-full text-foreground bg-background antialiased;
+  }
+
+  ::selection {
+    @apply bg-primary-100 text-primary-900;
+  }
+
+  /* Better form styles */
+  [type='text'],
+  [type='email'],
+  [type='url'],
+  [type='password'],
+  [type='number'],
+  [type='date'],
+  [type='datetime-local'],
+  [type='month'],
+  [type='search'],
+  [type='tel'],
+  [type='time'],
+  [type='week'],
+  [multiple],
+  textarea,
+  select {
+    @apply w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
+  }
+
+  [type='checkbox'],
+  [type='radio'] {
+    @apply rounded border-gray-300 text-primary-600 focus:ring-primary-500;
+  }
+}
+
+@layer components {
+  .container-xl {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-lg {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-md {
+    @apply max-w-3xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .heading-1 {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-display font-bold tracking-tight;
+  }
+
+  .heading-2 {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-display font-bold tracking-tight;
+  }
+
+  .heading-3 {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-display font-bold tracking-tight;
+  }
+
+  .body-lg {
+    @apply text-lg sm:text-xl leading-relaxed;
+  }
+
+  .body-base {
+    @apply text-base leading-relaxed;
+  }
+
+  .body-sm {
+    @apply text-sm leading-relaxed;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400;
+  }
+
+  .bg-gradient-primary {
+    @apply bg-gradient-to-r from-primary-600 to-primary-400;
+  }
+
+  .bg-gradient-accent {
+    @apply bg-gradient-to-r from-accent-500 to-accent-400;
+  }
 }

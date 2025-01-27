@@ -1,4 +1,6 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import SignupPage from '../page';
 import { supabaseClient } from '@/utils/supabase';
 import { useRouter } from 'next/navigation';
@@ -36,11 +38,11 @@ describe('SignupPage', () => {
     expect(screen.getByLabelText('Email address')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByLabelText('Role')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
   });
 
   it('handles successful signup', async () => {
-    const mockUser = { id: 'user123' };
+    const mockUser = { id: 'user123', email: 'test@example.com' };
     (supabaseClient.auth.signUp as jest.Mock).mockResolvedValueOnce({
       data: { user: mockUser },
       error: null
@@ -49,20 +51,19 @@ describe('SignupPage', () => {
       error: null
     });
 
+    const user = userEvent.setup();
     render(<SignupPage />);
 
-    fireEvent.change(screen.getByLabelText('Email address'), {
-      target: { value: 'test@example.com' }
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'password123' }
-    });
-    fireEvent.change(screen.getByLabelText('Role'), {
-      target: { value: 'customer' }
-    });
+    const emailInput = screen.getByLabelText('Email address');
+    const passwordInput = screen.getByLabelText('Password');
+    const roleSelect = screen.getByLabelText('Role');
 
-    const submitButton = screen.getByRole('button', { name: /sign up/i });
-    fireEvent.click(submitButton);
+    await user.type(emailInput, 'test@example.com');
+    await user.type(passwordInput, 'password123');
+    await user.selectOptions(roleSelect, 'customer');
+
+    const submitButton = screen.getByRole('button', { name: /create account/i });
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(supabaseClient.auth.signUp).toHaveBeenCalledWith({
@@ -77,44 +78,98 @@ describe('SignupPage', () => {
   it('displays error message on signup failure', async () => {
     const errorMessage = 'Signup failed';
     (supabaseClient.auth.signUp as jest.Mock).mockResolvedValueOnce({
-      data: null,
+      data: { user: null },
       error: { message: errorMessage }
     });
 
+    const user = userEvent.setup();
     render(<SignupPage />);
 
-    fireEvent.change(screen.getByLabelText('Email address'), {
-      target: { value: 'test@example.com' }
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'password123' }
-    });
-    fireEvent.change(screen.getByLabelText('Role'), {
-      target: { value: 'customer' }
-    });
+    const emailInput = screen.getByLabelText('Email address');
+    const passwordInput = screen.getByLabelText('Password');
+    const roleSelect = screen.getByLabelText('Role');
 
-    const submitButton = screen.getByRole('button', { name: /sign up/i });
-    fireEvent.click(submitButton);
+    await user.type(emailInput, 'test@example.com');
+    await user.type(passwordInput, 'password123');
+    await user.selectOptions(roleSelect, 'customer');
+
+    const submitButton = screen.getByRole('button', { name: /create account/i });
+    await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: errorMessage })).toBeInTheDocument();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
   });
 
   it('displays validation error for invalid email', async () => {
+    const user = userEvent.setup();
     render(<SignupPage />);
 
-    fireEvent.change(screen.getByLabelText('Email address'), {
-      target: { value: 'invalid-email' }
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'password123' }
-    });
-    
-    const submitButton = screen.getByRole('button', { name: /sign up/i });
-    fireEvent.click(submitButton);
+    const emailInput = screen.getByLabelText('Email address');
+    const passwordInput = screen.getByLabelText('Password');
+    const roleSelect = screen.getByLabelText('Role');
+
+    await user.type(emailInput, 'invalid-email');
+    await user.type(passwordInput, 'password123');
+    await user.selectOptions(roleSelect, 'customer');
+
+    const submitButton = screen.getByRole('button', { name: /create account/i });
+    await user.click(submitButton);
 
     expect(supabaseClient.auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it('renders all form elements correctly', () => {
+    render(<SignupPage />);
+
+    // Check for main elements
+    expect(screen.getByText('Create your account')).toBeInTheDocument();
+    expect(screen.getByText('Smart CRM')).toBeInTheDocument();
+    
+    // Check for form inputs
+    expect(screen.getByLabelText('Email address')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByLabelText('Role')).toBeInTheDocument();
+    
+    // Check for buttons
+    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
+  });
+
+  it('handles form input changes', async () => {
+    const user = userEvent.setup();
+    render(<SignupPage />);
+
+    // Get form elements
+    const emailInput = screen.getByLabelText('Email address');
+    const passwordInput = screen.getByLabelText('Password');
+    const roleSelect = screen.getByLabelText('Role');
+
+    // Test email input
+    await user.type(emailInput, 'test@example.com');
+    expect(emailInput).toHaveValue('test@example.com');
+
+    // Test password input
+    await user.type(passwordInput, 'password123');
+    expect(passwordInput).toHaveValue('password123');
+
+    // Test role select
+    await user.selectOptions(roleSelect, 'agent');
+    expect(roleSelect).toHaveValue('agent');
+  });
+
+  it('toggles password visibility', async () => {
+    const user = userEvent.setup();
+    render(<SignupPage />);
+
+    const passwordInput = screen.getByLabelText('Password');
+    const toggleButton = screen.getByRole('button', { name: /toggle password visibility/i });
+
+    // Password should be hidden by default
+    expect(passwordInput).toHaveAttribute('type', 'password');
+
+    // Click toggle button to show password
+    await user.click(toggleButton);
+    expect(passwordInput).toHaveAttribute('type', 'text');
   });
 }); 
 
