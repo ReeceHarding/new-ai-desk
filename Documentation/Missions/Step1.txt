@@ -1,0 +1,435 @@
+what haven't we done from this:
+
+Step 1
+
+Below is Step 1 of our plan, rendered in extreme detail—focusing on exactly how to create the monorepo and initial folder structure. This text contains no thought process or speculative wording. Everything is final, decisive, and expanded in maximum specificity. We include code where relevant.
+
+STEP 1: CREATE THE MONOREPO & INITIAL FOLDER STRUCTURE (ULTRA-DETAILED)
+
+1. Introduction to Step 1 ✅
+This step establishes our entire repository so that all subsequent features (like sign-up pages, ticket dashboards, scraping workers, marketing drips, etc.) have a proper foundation. By the end of Step 1, we possess:
+• A top-level repository with a precise name, plus a recommended structure for environment variables, Docker usage, or advanced dev tools. ✅
+• The folder layout for frontend/ (Next.js 13), backend/ (Node 18 concurrency tasks), and infrastructure/ (Supabase migrations + scripts). ❌
+• Thoroughly documented, permanent files: .gitignore, package.json, .env.example, docker-compose.yml, and so forth. ❌
+• No disclaimers, no partial references. Everything is final and certain. ❌
+
+2. Purpose & Scope of Step 1 ✅
+By the conclusion of Step 1, no partial tasks remain. The monorepo structure is complete, with named placeholders for each major component. We do not introduce sign-up flows or advanced features, because that belongs to later steps. This step is purely about directory layout, version control preparation, environment placeholders, and any top-level config that ensures future steps can proceed without chaos.
+
+3. Repository Creation ✅
+a. Repository Name ✅
+We name the repository smart-crm-outreach or a final name if previously agreed (like mega-crm-helpdesk).
+b. Host ✅
+We place it on GitHub or an equivalent. If using GitHub, create it via the GitHub web interface or the gh CLI.
+c. Local Clone ✅
+On a local machine, we do something like:
+
+mkdir smart-crm-outreach
+cd smart-crm-outreach
+git init
+
+This yields a local .git/ directory for version control.
+
+4. Top-Level Files
+a. .gitignore ✅
+We add a .gitignore file so that unnecessary or sensitive data (like node_modules, .env, build artifacts) never enters the repo. The final .gitignore might look like:
+
+# Node modules
+node_modules/
+# Env files
+.env
+.env.*
+# Build artifacts
+dist/
+.next/
+# Logs
+*.log
+# Mac or OS junk
+.DS_Store
+# Docker
+docker-compose.override.yml
+
+b. README.md ❌
+We create a descriptive README.md at the root. It might say:
+
+# Smart CRM & Outreach Monorepo
+
+This repository houses the entire codebase for a multi-role CRM, helpdesk, marketing, and smart outreach platform.
+Below is the top-level structure:
+
+- `infrastructure/`: Supabase migrations and scripts
+- `backend/`: Node 18 concurrency worker tasks (scraping, emailing)
+- `frontend/`: Next.js 13 React application
+- `docker-compose.yml`: Orchestrates multi-service dev environment
+...
+
+This readme is final, giving newcomers a quick overview of how the monorepo is organized.
+c. LICENSE ❌
+If we want to apply a license (e.g., MIT, Apache 2.0), we drop a LICENSE file. That is final.
+d. .env.example ✅
+We place a .env.example at the root to demonstrate the environment variables used in dev or production:
+
+# Supabase
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_ANON_KEY=abc123
+SUPABASE_SERVICE_KEY=def456
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Gmail OAuth
+GMAIL_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GMAIL_CLIENT_SECRET=your-client-secret
+
+# Additional
+JWT_SECRET=some-secret-value
+...
+
+We do not include real secrets in the repo. This .env.example ensures each developer can replicate local variables. We do not disclaim this approach; it is final and certain.
+e. docker-compose.yml ❌
+We add a top-level docker-compose.yml that possibly references our frontend and backend Dockerfiles. We also define Redis, if we plan to run it in dev. A minimal example:
+
+version: '3'
+services:
+  redis:
+    image: 'redis:latest'
+    container_name: 'smartcrm-redis'
+    ports:
+      - "6379:6379"
+
+  backend-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: 'smartcrm-backend-worker'
+    depends_on:
+      - redis
+    environment:
+      REDIS_URL: "redis://redis:6379"
+      SUPABASE_SERVICE_KEY: "${SUPABASE_SERVICE_KEY}"
+      SUPABASE_URL: "${SUPABASE_URL}"
+    # any other environment variables needed for the backend worker
+    volumes:
+      - ./backend:/app
+    command: "yarn start"
+
+  frontend-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: 'smartcrm-frontend-web'
+    depends_on:
+      - redis
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: "${SUPABASE_URL}"
+    # etc
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    command: "yarn dev"
+
+By the end of Step 1, this file or some variant is present. Even if we do not run it immediately, the structure is laid out for future usage.
+f. package.json (Root) ❌
+If we decide to manage the entire monorepo with a single Yarn or PNPM workspace, we place a root-level package.json with:
+
+{
+  "name": "smart-crm-outreach-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "start": "echo 'No root start script. Use each workspace individually.'"
+  }
+}
+
+That ensures Yarn can treat frontend and backend as sub-packages.
+g. turbo.json or nx.json (Optional) ❌
+If we adopt Turborepo or Nx for caching and pipeline definitions, we define a turbo.json:
+
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**"]
+    },
+    "dev": {
+      "cache": false
+    }
+  }
+}
+
+This is final if we want advanced monorepo tooling. If not, we skip it. No disclaimers.
+
+5. Infrastructure Folder Setup
+a. infrastructure/migrations/ ✅
+We create 000_init_schema.sql with the entire massive final schema. In Step 2, we will apply it. But physically, the file is placed here in Step 1.
+b. infrastructure/scripts/ ✅
+We also create placeholders like migrate-supabase.ts, seed-dev-data.ts, etc. By the end of Step 1, these files may be empty or minimal:
+
+// infrastructure/scripts/migrate-supabase.ts
+console.log("Migration script placeholder. We'll implement it in Step 2.");
+
+The key is that the folder structure is correct. We do not disclaim. This is final.
+c. infrastructure/supabase-cli-config.json ❌
+If using the Supabase CLI, we place a config file referencing the project ID or database URL. For example:
+
+{
+  "project_id": "some-unique-id",
+  "db_url": "postgresql://postgres:password@db.somehost.com:5432/postgres"
+}
+
+This is final, with no disclaimers.
+
+6. Backend Folder Setup ❌
+a. backend/Dockerfile ❌
+We define a minimal Dockerfile for the concurrency worker, like:
+
+FROM node:18
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn install
+COPY . .
+EXPOSE 4000
+CMD ["yarn", "start"]
+
+This is final if we plan to containerize. No disclaimers.
+b. backend/package.json ❌
+We define scripts for our concurrency tasks. By the end of Step 1:
+
+{
+  "name": "smartcrm-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^4.8.0"
+  }
+}
+
+This is final. No disclaimers.
+c. backend/tsconfig.json ❌
+Possibly:
+
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "outDir": "dist",
+    "esModuleInterop": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
+
+This final file ensures we can compile the concurrency worker properly.
+d. backend/.env.example ❌
+We might place worker-specific environment variables:
+
+REDIS_URL=redis://localhost:6379
+SUPABASE_SERVICE_KEY=def456
+
+And so on, so each developer knows how to configure the backend worker locally.
+e. backend/src/ ❌
+We create placeholders:
+	• index.ts: empty or minimal for now. We simply do:
+
+console.log("Backend concurrency worker entry. We'll add BullMQ in later steps.");
+
+
+	• queues/, workers/, services/, utils/ folders. They remain empty placeholders with readme stubs:
+
+/queues/ -> For BullMQ queue definitions
+/workers/ -> For concurrency tasks (scrapeWorker, emailWorker, etc.)
+/services/ -> For logic modules (scrapingService, gmailService, etc.)
+/utils/ -> For small helper files (logger, parseEmail, etc.)
+
+
+	• tests/ folder for worker tests if needed. Also empty placeholders:
+	• worker.test.ts
+	• scrapingService.test.ts
+	• emailService.test.ts
+f. Result of Backend Folder ❌
+By the end of Step 1, the backend folder is fully laid out, though mostly empty. We do not disclaim. This final approach ensures no confusion in future steps.
+
+7. Frontend Folder Setup ❌
+a. frontend/Dockerfile ❌
+For the Next.js app:
+
+FROM node:18
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn install
+COPY . .
+EXPOSE 3000
+CMD ["yarn", "dev"]
+
+We place it in frontend/Dockerfile. No disclaimers.
+b. frontend/package.json ❌
+
+{
+  "name": "smartcrm-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "react": "18.x",
+    "react-dom": "18.x",
+    "next": "13.x",
+    "typescript": "^4.8.0"
+  }
+}
+
+Enough to run Next.js 13 in dev.
+c. frontend/tsconfig.json ❌
+Possibly:
+
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve"
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+
+d. frontend/.env.example ❌
+If we have front-end environment variables:
+
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SOMETHING_ELSE=somevalue
+
+This ensures no disclaimers.
+e. frontend/app/ ❌
+We create the Next.js 13 structure:
+	• app/layout.tsx: a simple layout:
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html>
+      <body>{children}</body>
+    </html>
+  );
+}
+
+
+	• app/page.tsx:
+
+export default function HomePage() {
+  return (
+    <div>
+      <h1>Welcome to Smart CRM</h1>
+      <p>Initial placeholder. We'll add sign-up flows in the next steps.</p>
+    </div>
+  );
+}
+
+
+	• Potential subfolders for auth, admin, agent, customer. But we keep them empty placeholders at this step.
+f. frontend/public/ ❌
+	• Place favicon.ico, logo192.png, logo512.png.
+	• Possibly a minimal placeholder. No disclaimers.
+g. frontend/pages/ ❌
+	• Might remain empty if we rely solely on the app/ router.
+h. frontend/components/ ❌
+	• Possibly empty or just a Layout.tsx placeholder for future.
+i. frontend/hooks/ ❌
+	• No disclaimers, a placeholder. No actual code beyond a readme if we want.
+j. frontend/utils/ ❌
+	• Another placeholder.
+k. frontend/styles/ ❌
+	• Possibly globals.css. We might do:
+
+/* minimal reset or placeholder */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: sans-serif;
+}
+
+
+	• This is final. Step 1 has the skeleton.
+l. frontend/tests/ ❌
+	• Place placeholders for pages/adminDashboard.test.tsx, etc.
+	• We do not disclaim. This is final.
+
+8. docs Folder Setup ❌
+a. docs/ARCHITECTURE.md: A placeholder, explaining we have a multi-role CRM with knowledge base, etc.
+b. docs/DESIGN_SYSTEM.md: If we want a style guide.
+c. docs/AI_PROMPTS.md: Possibly empty references for future.
+
+9. .github Folder Setup (Optional) ❌
+a. .github/workflows/ci.yml: If we do CI with lint/test.
+b. .github/workflows/deploy.yml: If we do a deploy pipeline.
+c. .github/issue_templates/bug_report.md and feature_request.md.
+
+10. Verifying the Entire Step
+a. Check each folder: infrastructure/, backend/, frontend/, docs/, .github/. ❌
+b. Commit changes: ✅
+git add .
+git commit -m "Step 1: Created monorepo structure"
+git push origin main
+
+c. No disclaimers. This is final.
+
+11. Sanity Test ❌
+• We can do a minimal "Hello World" in the frontend/app/page.tsx. Then cd frontend && yarn dev. If the Next.js site loads at http://localhost:3000 with a "Welcome to Smart CRM" text, step 1 is successful.
+• We do not run any concurrency tasks or migrations yet. That will come in Step 2.
+
+12. Possible Yarn Scripts (Root-level) ❌
+• If using Yarn workspaces, in the root package.json
+
+13. Final Result of Step 1
+By the end:
+• The monorepo is fully structured: ❌
+• infrastructure/migrations/000_init_schema.sql holds the entire final supabase schema (though not applied yet). ✅
+• backend/ has minimal placeholders for concurrency code. ❌
+• frontend/ has a Next.js 13 skeleton, a landing page, a layout.tsx, and placeholders for sign-up flows or dashboards. ❌
+• .gitignore, .env.example, docker-compose.yml, README.md, LICENSE are all in place at the root, with no disclaimers. ❌
+• We do not disclaim partial or future changes. Everything is final for Step 1. ❌
+
+14. Scope & No Overreach ✅
+• We do not implement sign-up or advanced logic. That belongs to subsequent steps.
+• This step is purely about a stable, final skeleton with the correct directories, minimal code, environment placeholders, Docker config, and top-level scripts.
+
+Conclusion of Step 1 ❌
+
+We have now completed Step 1 in excruciating detail. The monorepo is fully formed, with a guaranteed final structure that includes:
+• infrastructure/ for migrations & scripts ✅
+• backend/ for concurrency tasks & Node worker code ❌
+• frontend/ for Next.js 13, with a minimal layout and home page ❌
+• docs/ for architectural references ❌
+• .github/ for CI/CD definitions ❌
+
+No disclaimers or uncertain statements remain. This step provides everything needed for subsequent steps to proceed—sign-up pages, ticket dashboards, scraping logic, marketing drips—with a stable foundation.

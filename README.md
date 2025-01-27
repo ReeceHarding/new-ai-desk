@@ -1,28 +1,27 @@
-# Smart Outreach
+# Smart CRM & Outreach Monorepo
 
-This repository contains a single-admin outreach automation platform using Node.js, Next.js, Supabase, Redis, Selenium, Pinecone, and GPT.
+This repository houses the entire codebase for a multi-role CRM, helpdesk, marketing, and smart outreach platform.
 
 ## Project Structure
-- `backend/` - Node.js + TypeScript backend services
-- `frontend/` - Next.js + TypeScript frontend application
-- `scripts/` - Database migrations and development utilities
-- `docker-compose.yml` - Local development services (Redis, Selenium)
 
-## Setup Steps
-1. Environment Setup
-2. Single-Admin Auth
-3. Knowledge Base Integration
-4. Campaign Management
-5. Email Automation
-6. Analytics Dashboard
-7. Lead Generation
-8. GPT Integration
-9. Security & Compliance
-10. Production Deployment
+- `infrastructure/`: Supabase migrations and scripts
+- `backend/`: Node 18 concurrency worker tasks (scraping, emailing)
+- `frontend/`: Next.js 13 React application
+- `docker-compose.yml`: Orchestrates multi-service dev environment
 
-## Local Development
-1. Copy `.env.example` to `.env` and fill in required values
-2. Run `docker-compose up -d` to start Redis and Selenium
-3. Run database migrations: `bash scripts/migrate-supabase-schema.sh`
-4. Start backend: `cd backend && npm run dev`
-5. Start frontend: `cd frontend && npm run dev` 
+## Getting Started
+
+1. Clone the repository
+2. Copy `.env.example` to `.env` and fill in your values
+3. Run `yarn install` to install dependencies
+4. Start the development environment with `docker-compose up`
+
+## Development
+
+- Frontend: http://localhost:3000
+- Backend Worker: http://localhost:4000
+- Supabase: Managed cloud instance
+
+## License
+
+MIT License - see LICENSE file for details 
